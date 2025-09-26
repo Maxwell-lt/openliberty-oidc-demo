@@ -3,8 +3,14 @@
 
     <!-- Enable features -->
     <featureManager>
-        <feature>jakartaee-10.0</feature>
-        <feature>microProfile-7.0</feature>
+        <platform>jakartaee-10.0</platform>
+        <platform>microProfile-7.1</platform>
+        <feature>mpHealth</feature>
+        <feature>jaxrs</feature>
+        <feature>jsonb</feature>
+        <feature>openidConnectClient-1.0</feature>
+        <feature>transportSecurity-1.0</feature>
+        <feature>appSecurity</feature>
     </featureManager>
 
     <!-- This template enables security. To get the full use of all the capabilities, a keystore and user registry are required. -->
@@ -34,6 +40,36 @@
     <!-- Automatically expand WAR files and EAR files -->
     <applicationManager autoExpand="true"/>
 
+    <webApplication location="liberty-testing-21.war" id="liberty-testing" name="liberty-testing" >
+        <application-bnd>
+            <security-role name="users">
+                <special-subject type="ALL_AUTHENTICATED_USERS"/>
+            </security-role>
+        </application-bnd>
+    </webApplication>
+
     <!-- Default SSL configuration enables trust for default certificates from the Java runtime -->
     <ssl id="defaultSSLConfig" trustDefaultCerts="true" />
+
+    <variable name="CLIENT_SECRET" defaultValue="test"/>
+
+    <openidConnectClient id="authelia"
+                         clientId="bc35915f-0c81-473c-b42d-439b070b4289"
+                         clientSecret="${CLIENT_SECRET}"
+                         discoveryEndpointUrl="https://auth.maxwell-lt.dev/.well-known/openid-configuration"
+                         authFilterRef="api"
+                         pkceCodeChallengeMethod="S256"
+                         signatureAlgorithm="RS256"
+                         userIdentifier="name"
+                         uniqueUserIdentifier="sub"
+                         scope="openid profile"
+                         userInfoEndpointEnabled="true"
+                         tokenOrderToFetchCallerClaims="IDToken"
+    >
+        <tokenParameter name="scope" value="openid profile"/>
+    </openidConnectClient>
+
+    <authFilter id="api">
+        <requestUrl urlPattern="/api" matchType="contains"/>
+    </authFilter>
 </server>
